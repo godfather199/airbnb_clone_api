@@ -3,8 +3,8 @@ import {error_Handler} from './errorHandler.js'
 
 
 export const verify_Token = (req, res, next) => {
-    console.log('Inside verify_Token')
-    console.log('Token: ', req.cookies.access_token_ab)
+    // console.log('Inside verify_Token')
+    // console.log('Token: ', req.cookies.access_token_ab)
     const token = req.cookies.access_token_ab
 
     if(!token) {

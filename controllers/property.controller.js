@@ -39,12 +39,13 @@ export const create_New_Property = async (req, res, next) => {
 
 export const fetch_All_Properties = async (req, res, next) => {
     try {
-        const properties = await Property.find()
+        const properties = await Property.find().populate('owner')
 
         res.status(201).json({
             msg: 'All properties fetched',
             properties
         })
+        
     } catch (error) {
         next(error)
     }
@@ -55,8 +56,9 @@ export const fetch_All_Properties = async (req, res, next) => {
 export const fetch_Property_By_Category = async (req, res, next) => {
     try {
         const {category} = req.params
+        console.log('fetch_Property_By_Category params: ', category)
 
-        const properties = await Property.find({category})
+        const properties = await Property.find({category}).populate('owner')
 
         res.status(201).json({
             msg: 'Property fetched by category',
@@ -66,6 +68,27 @@ export const fetch_Property_By_Category = async (req, res, next) => {
         next(error)
     }
 }
+
+
+
+export const property_Filters = async (req, res, next) => {
+  try {
+    const { max_Distance, min_Price, max_Price } = req.query;
+
+    const properties = await Property.find({
+      price: { $gte: min_Price, $lte: max_Price },
+      distance: { $lte: max_Distance }
+    });
+
+    res.status(201).json({
+      msg: "Properties fetched by distance",
+      properties,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 
 export const update_Property_Details = async (req, res, next) => {}

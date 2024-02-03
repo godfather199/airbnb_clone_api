@@ -41,11 +41,11 @@ const property_Schema = new Schema(
       required: true,
     },
     distance: {
-      type: String,
+      type: Number,
       required: true,
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     checkIn: {
