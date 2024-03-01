@@ -12,4 +12,5 @@ router.get('/filters', property_Filters)
 router.get('/:category', fetch_Property_By_Category)
 
 
+
 export default router

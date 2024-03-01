@@ -1,4 +1,5 @@
 import User from '../models/user.model.js'
+import Property from '../models/property.model.js'
 import {error_Handler} from '../middlewares/errorHandler.js'
 import jwt from 'jsonwebtoken'
 
@@ -82,6 +83,83 @@ export const fetch_All_Users = async (req, res, next) => {
             msg: 'Fetch all users',
             users
         })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+export const add_To_Whishlist = async (req, res, next) => {
+    try {
+        const {property_Id} = req.query
+        const {id: userId} = req.user
+
+        const logged_In_User = await User.findById(userId)
+        logged_In_User.whishlist.push(property_Id)
+        await logged_In_User.save()
+
+        res.status(201).json({
+            msg: 'Property Added to whishlist',
+            logged_In_User
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+export const all_Properties_From_Whishlist = async (req, res, next) => {
+    try {
+       const {id: userId} = req.user
+       
+       const { whishlist: user_Whishlist } = await User.findById(userId).select(
+         "whishlist"
+       );
+
+       const properties = await Promise.all(
+         user_Whishlist.map(async (item) => await Property.findById(item).populate('owner'))
+       );
+
+    //    const logged_In_User = await User.findById(userId)
+
+    //    const properties = await Promise.all(
+    //      logged_In_User.whishlist.map(async (item) => await Property.findById(item))
+    //    );
+
+       res.status(201).json({
+        msg: 'Whishlist properties fetched',
+        properties,
+        // logged_In_User
+       })
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+
+export const remove_From_Whishlist = async (req, res, next) => {
+    try {
+        const {property_Id} = req.query
+
+        const {id: userId} = req.user
+
+        const logged_In_User = await User.findById(userId)
+
+        logged_In_User.whishlist = logged_In_User.whishlist.filter(
+          (item) => item.toString() !== property_Id.toString()
+        );
+        await logged_In_User.save()
+
+        res.status(201).json({
+            msg: 'Property removed from whishlist',
+            logged_In_User
+        })
+
     } catch (error) {
         next(error)
     }

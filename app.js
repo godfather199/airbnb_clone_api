@@ -5,7 +5,7 @@ import morgan from 'morgan'
 import cors from 'cors'
 import userRouter from './routes/user.route.js'
 import property_Router from './routes/property.route.js'
-
+import booking_Router from './routes/booking.route.js'
 
 
 // Initalizing express
@@ -28,6 +28,7 @@ app.use(cors({
 // Route Middlewares
 app.use('/api/user', userRouter)
 app.use('/api/property', property_Router)
+app.use('/api/booking', booking_Router)
 
 
 

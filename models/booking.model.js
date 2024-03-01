@@ -14,3 +14,11 @@
 //   checkIn: {required: true}
 //   checkOut: {required: true}
 //   totalPrice: {required: true}
+// guests: {
+//     adults: {
+//         type: String
+//     },
+//     children: {
+//         type: String
+//     },
+// }

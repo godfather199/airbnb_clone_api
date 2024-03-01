@@ -56,7 +56,7 @@ export const fetch_All_Properties = async (req, res, next) => {
 export const fetch_Property_By_Category = async (req, res, next) => {
     try {
         const {category} = req.params
-        console.log('fetch_Property_By_Category params: ', category)
+        // console.log('fetch_Property_By_Category params: ', category)
 
         const properties = await Property.find({category}).populate('owner')
 
@@ -92,14 +92,6 @@ export const property_Filters = async (req, res, next) => {
 
 
 export const update_Property_Details = async (req, res, next) => {}
-
-
-
-export const add_To_Whishlist = async (req, res, next) => {}
-
-
-
-export const remove_From_Whishlist = async (req, res, next) => {}
 
 
 
