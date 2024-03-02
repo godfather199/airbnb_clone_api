@@ -6,25 +6,6 @@ const stripe = new stripePackage(process.env.STRIPE_SECRET);
 
 
 export const stripe_Checkout_Session = async (req, res, next) => {
-  // const line_items = [
-  //   {
-  //     price_data: {
-  //       currency: "inr",
-  //       product_data: {
-  //         name: "Airbnb Item",
-  //         images:
-  //           "https://www.istockphoto.com/photo/solo-traveller-backpacker-gets-keys-from-room-owner-travel-short-term-rent-gm1414392057-463130459?utm_campaign=srp_photos_top&utm_content=https%3A%2F%2Funsplash.com%2Fs%2Fphotos%2Fairbnb&utm_medium=affiliate&utm_source=unsplash&utm_term=airbnb%3A%3A%3A",
-  //         description: 'Some random description',
-  //         metadata: {
-  //           id: '1234',
-  //         },
-  //       },
-  //       unit_amount: 40000 * 100,
-  //     },
-  //     quantity: 1,
-  //   }
-  // ]
-
   const line_items = [
     {
       price_data: {
@@ -54,53 +35,60 @@ export const stripe_Checkout_Session = async (req, res, next) => {
 
 
 
-const express = require('express'); 
-const proxy = require('http-proxy-middleware');
 
-const router = express.Router();
+// This is your Stripe CLI webhook secret for testing your endpoint locally.
+// const endpointSecret = "whsec_47ca9255c6de47f0439620939ad1d874a07d485d3637ab6f1d20141891f5acc2";
 
-const servers = [
-  {
-    host: 'localhost',
-    port: 3000,
-    weight: 1,
-  },
-  // Add more servers here
-];
+export const stripe_Webhook_Handler = async (req, res, next) => {
+  let data;
+  let eventType;
 
-// Proxy middleware configuration
-const proxyOptions = {
-  target: '',
-  changeOrigin: true,
-  onProxyReq: (proxyReq, req) => {
-    // Add custom header to request
-    proxyReq.setHeader('X-Special-Proxy-Header', 'foobar');
-  },
-  logLevel: 'debug' 
-};
+  // Check if webhook signing is configured.
+  let webhookSecret;
+  //webhookSecret = process.env.STRIPE_WEB_HOOK;
 
-// Next server index
-let currIndex = 0;
+  if (webhookSecret) {
+    // Retrieve the event by verifying the signature using the raw body and secret.
+    let event;
+    let signature = req.headers["stripe-signature"];
 
-// Get next server
-function getServer() {
+    
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        webhookSecret
+      );
+    } catch (err) {
+      console.log(`⚠️  Webhook signature verification failed:  ${err}`);
+      return res.sendStatus(400);
+    }
 
-  // Round robin
-  currIndex = (currIndex + 1) % servers.length;
 
-  return servers[currIndex];
+    // Extract the object from the event.
+    data = event.data.object;
+    eventType = event.type;
+  } else {
+    // Webhook signing is recommended, but if the secret is not configured in `config.js`,
+    // retrieve the event data directly from the request body.
+    data = req.body.data.object;
+    eventType = req.body.type;
+    // console.log('Data: ', data)
+    console.log('Event Type: ', eventType)
+  }
+
+  // Handle the checkout.session.completed event
+  if (eventType === "checkout.session.completed") {
+    console.log('Stripe checkout successed')
+  }
+
+  res.status(200).end();
 }
 
 
-// Proxy requests
-router.all('*', (req, res) => {
-  
-  // Get next target server
-  const target = getServer();
-  proxyOptions.target = `http://${target.host}:${target.port}`;
-  
-  // Forward request
-  proxy(proxyOptions)(req, res); 
-});
 
-module.exports = router;
+
+
+
+
+

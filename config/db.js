@@ -6,8 +6,8 @@ set('strictQuery', true)
 
  const connect_MongoDB = () => {
      connect(process.env.MONGO_URI, {
-       useNewUrlParser: true,
-       useUnifiedTopology: true,
+      //  useNewUrlParser: true,
+      //  useUnifiedTopology: true,
      })
        .then(() => {
          console.log(`Connected to MongoDB`);
