@@ -1,94 +1,129 @@
-import stripePackage from 'stripe';
-import {config} from 'dotenv'
-config()
+import Booking from '../models/booking.model.js'
+import stripePackage from "stripe";
+import { config } from "dotenv";
+import {
+  modify_Date_Format,
+  total_Booking_Amount,
+} from "../utils/stripeUtils.js";
 
+
+config();
 const stripe = new stripePackage(process.env.STRIPE_SECRET);
 
 
+
 export const stripe_Checkout_Session = async (req, res, next) => {
+  const { current_Property, booking_Dates, adultGuests, childrenGuests } =
+    req.body;
+  const {id: logged_In_User_Id} = req.user
+  // console.log("Booking Data: ", req.body);
+
+  const final_Booking_Dates = modify_Date_Format(booking_Dates);
+
+  const final_Booking_Price = total_Booking_Amount(
+    booking_Dates,
+    current_Property.price
+  ) 
+
+  const metadata_Properties = {
+    property_Id: current_Property._id,
+    booking_Start_Date: final_Booking_Dates[0],
+    booking_End_Date: final_Booking_Dates[1],
+    customer_Id: logged_In_User_Id,
+    adults: adultGuests,
+    children: childrenGuests,
+    booking_Price: final_Booking_Price/100
+  };
+
   const line_items = [
     {
       price_data: {
-        currency: 'inr',
+        currency: "inr",
         product_data: {
-          name: "Airbnb Item",
-          images:
-           [ "https://media.istockphoto.com/id/1414392057/photo/solo-traveller-backpacker-gets-keys-from-room-owner-travel-short-term-rent-couchsurfing.jpg?s=1024x1024&w=is&k=20&c=W-nVNgKEIq4vQHPzWOL9CW-PfOaKgztpU42jcmPSmZo="],
+          name: current_Property.title,
+          images: [current_Property.property_Images[0].url],
+          description: `Booking dates- ${final_Booking_Dates[0]} to ${final_Booking_Dates[1]}`,
         },
-        unit_amount: 2000,
+        unit_amount: final_Booking_Price,
       },
       quantity: 1,
     },
-  ]
+  ];
 
   const session = await stripe.checkout.sessions.create({
     // payment_method_types: ["card"],
     line_items: line_items,
+    metadata: metadata_Properties,
+    payment_intent_data: {
+      metadata: metadata_Properties,
+    },
     mode: "payment",
     success_url: `http://localhost:5173/success`,
   });
 
   res.status(201).json({ url: session.url });
-}
+};
 
 
 
+export const new_Booking = async (booking_Details) => {
+  const {
+    property_Id,
+    adults,
+    customer_Id,
+    booking_Price,
+    booking_Start_Date,
+    children,
+    booking_End_Date,
+  } = booking_Details;
 
 
-
-// This is your Stripe CLI webhook secret for testing your endpoint locally.
-// const endpointSecret = "whsec_47ca9255c6de47f0439620939ad1d874a07d485d3637ab6f1d20141891f5acc2";
-
-export const stripe_Webhook_Handler = async (req, res, next) => {
-  let data;
-  let eventType;
-
-  // Check if webhook signing is configured.
-  let webhookSecret;
-  //webhookSecret = process.env.STRIPE_WEB_HOOK;
-
-  if (webhookSecret) {
-    // Retrieve the event by verifying the signature using the raw body and secret.
-    let event;
-    let signature = req.headers["stripe-signature"];
-
-    
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        signature,
-        webhookSecret
-      );
-    } catch (err) {
-      console.log(`⚠️  Webhook signature verification failed:  ${err}`);
-      return res.sendStatus(400);
+  const create_Booking = await Booking.create({
+    propertyId: property_Id,
+    customerId: customer_Id,
+    checkIn: booking_Start_Date,
+    checkOut: booking_End_Date,
+    totalPrice: booking_Price,
+    guests: {
+      adults: adults,
+      children: children
     }
+  })
 
-
-    // Extract the object from the event.
-    data = event.data.object;
-    eventType = event.type;
-  } else {
-    // Webhook signing is recommended, but if the secret is not configured in `config.js`,
-    // retrieve the event data directly from the request body.
-    data = req.body.data.object;
-    eventType = req.body.type;
-    // console.log('Data: ', data)
-    console.log('Event Type: ', eventType)
-  }
-
-  // Handle the checkout.session.completed event
-  if (eventType === "checkout.session.completed") {
-    console.log('Stripe checkout successed')
-  }
-
-  res.status(200).end();
+  
 }
 
 
 
+export const fetch_Latest_Booking = async (req, res, next) => {
+  const most_Recent_Booking = await Booking.findOne().sort({ createdAt: -1 }).exec();
+
+  res.status(201).json({
+    msg: 'Property booked successfully',
+    most_Recent_Booking
+  })
+}
 
 
 
+export const fetch_All_User_Bookings = async (req, res, next) => {
+  try {
+    const {id: logged_In_User} = req.user
 
+    const users_Bookings = await Booking.find({
+      customerId: logged_In_User,
+    }).populate({
+      path: "propertyId",
+      populate: {
+        path: "owner",
+      },
+    });    
 
+    res.status(201).json({
+      msg: 'Logged in users booking',
+      users_Bookings
+    })
+  } catch (error) {
+    next(error)
+  }
+}

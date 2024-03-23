@@ -1,7 +1,35 @@
 import { cloudinary_Handler } from '../middlewares/cloudinaryHandler.js'
 import Property from '../models/property.model.js'
 import User from '../models/user.model.js'
+import Booking from '../models/booking.model.js'
 
+
+
+export const search_Property = async (req, res, next) => {
+    // console.log('Inside search_Property controller')
+    try {
+        const {search_Location} = req.query
+        // console.log('Location: ', search_Location)
+
+        const result_Properties = await Property.find({
+          $or: [
+            {
+              location: {
+                $regex: search_Location,
+                $options: "i",
+              },
+            },
+          ],
+        });
+        // console.log('Result: ', result_Properties)
+        res.status(201).json({
+            msg: 'Searched location',
+            result_Properties
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 
 
@@ -38,14 +66,42 @@ export const create_New_Property = async (req, res, next) => {
 
 
 export const fetch_All_Properties = async (req, res, next) => {
+    // It should take propertyId and check if there is a corresponding booking dates for that property
+    
     try {
-        const properties = await Property.find().populate('owner')
+        const all_Properties = await Property.find().populate('owner')
+
+        const properties = await Promise.all(
+          all_Properties.map(async (property) => {
+            const property_Bookings = await Booking.find({
+              propertyId: property._id,
+            });
+            return { ...property._doc, bookings: property_Bookings }; 
+          })
+        );        
 
         res.status(201).json({
             msg: 'All properties fetched',
             properties
         })
         
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+export const fetch_Single_Property = async (req, res, next) => {
+    try {
+        const {propertyId} = req.params
+
+        const property = await Property.findById(propertyId).populate('owner')
+
+        res.status(201).json({
+            msg: 'Property fetched', 
+            property
+        })
     } catch (error) {
         next(error)
     }
@@ -88,6 +144,7 @@ export const property_Filters = async (req, res, next) => {
     next(error);
   }
 }
+
 
 
 

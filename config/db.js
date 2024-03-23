@@ -1,12 +1,11 @@
 import {connect, set} from 'mongoose'
 
-
 set('strictQuery', true)
 
 
  const connect_MongoDB = () => {
-     connect(process.env.MONGO_URI, {
-      //  useNewUrlParser: true,
+   connect(process.env.MONGO_URI, {
+   //  useNewUrlParser: true,
       //  useUnifiedTopology: true,
      })
        .then(() => {
@@ -16,7 +15,7 @@ set('strictQuery', true)
          console.log(`Unable to connect to MongoDB: ${err}`);
        });
  };
-
-
+//  rajatmehra21
+//  5zj9dFnyzNvFdxvE
 
 export default connect_MongoDB

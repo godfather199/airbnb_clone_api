@@ -1,25 +1,44 @@
+import { Schema, model } from "mongoose";
+
+
+const {ObjectId} = Schema.Types
+
+
+export const bookingSchema = new Schema({
+    propertyId: {
+        type: ObjectId,
+        ref: 'property',
+        required: true
+    },
+    customerId: {
+        type: ObjectId,
+        ref: 'user',
+        required: true
+    },
+    checkIn:{
+        type: String
+    },
+    checkOut:{
+        type: String
+    },
+    totalPrice: {
+        type: String
+    },
+    guests: {
+        adults: {
+            type: String
+        },
+        children: {
+            type: String
+        },
+    }
+},
+{
+    timestamps: true
+})
 
 
 
-// Booking model
+export default model('booking', bookingSchema)
 
-//   property: {
-//     ref: 'property'
-//     required: true
-//   }
-//   reserved_User_Info: {
-//     ref: 'user'
-//     requried: true
-//   }
-//   checkIn: {required: true}
-//   checkOut: {required: true}
-//   totalPrice: {required: true}
-    //  stripe_Id: {required: true}
-// guests: {
-//     adults: {
-//         type: String
-//     },
-//     children: {
-//         type: String
-//     },
-// }
+

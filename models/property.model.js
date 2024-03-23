@@ -66,11 +66,3 @@ const property_Schema = new Schema(
 export default model('property', property_Schema)
 
 
-
-
-// Category
-//   Rooms
-//   Cabins
-//   Historical homes
-//   Luxe
-//   Castles
