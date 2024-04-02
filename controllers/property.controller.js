@@ -109,24 +109,6 @@ export const fetch_Single_Property = async (req, res, next) => {
 
 
 
-export const fetch_Property_By_Category = async (req, res, next) => {
-    try {
-        const {category} = req.params
-        // console.log('fetch_Property_By_Category params: ', category)
-
-        const properties = await Property.find({category}).populate('owner')
-
-        res.status(201).json({
-            msg: 'Property fetched by category',
-            properties
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
-
-
 export const property_Filters = async (req, res, next) => {
   try {
     const { max_Distance, min_Price, max_Price } = req.query;
@@ -147,6 +129,23 @@ export const property_Filters = async (req, res, next) => {
 
 
 
+export const logged_In_User_Property = async (req, res, next) => {
+  try {
+    const {id: userId} = req.user
+
+    const properties = await Property.find({owner: userId}).populate('owner')
+
+    res.status(201).json({
+      msg: "Logged in user's property fetched",
+      properties
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+
 
 export const update_Property_Details = async (req, res, next) => {}
 
@@ -157,3 +156,21 @@ export const fetch_All_Trips = async (req, res, next) => {}
 
 
 export const fetch_All_Listed_Properties = async (req, res, next) => {}
+
+
+
+export const fetch_Property_By_Category = async (req, res, next) => {
+  try {
+      const {category} = req.params
+      // console.log('fetch_Property_By_Category params: ', category)
+
+      const properties = await Property.find({category}).populate('owner')
+
+      res.status(201).json({
+          msg: 'Property fetched by category',
+          properties
+      })
+  } catch (error) {
+      next(error)
+  }
+}

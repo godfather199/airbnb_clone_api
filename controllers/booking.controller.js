@@ -1,4 +1,6 @@
 import Booking from '../models/booking.model.js'
+import Property from '../models/property.model.js'
+import User from '../models/user.model.js'
 import stripePackage from "stripe";
 import { config } from "dotenv";
 import {
@@ -122,6 +124,47 @@ export const fetch_All_User_Bookings = async (req, res, next) => {
     res.status(201).json({
       msg: 'Logged in users booking',
       users_Bookings
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+
+
+export const logged_In_User_Hosted_Properties = async (req, res, next) => {
+  try {
+    const {id: userId} = req.user
+
+    const logged_In_User = await User.findById(userId)
+
+    const booked_Properties = await Promise.all(
+      logged_In_User.properties.map(async (property) => {
+        const property_Bookings = await Booking.find({
+          propertyId: property._id,
+        }).populate({
+          path: "propertyId",
+          populate: {
+            path: "owner",
+          },
+        }).populate({
+          path: 'customerId'
+        })
+
+        return property_Bookings.length > 0
+          // ? { ...property._doc, bookings: property_Bookings }
+          ? { ...property._doc,  property_Bookings }
+          : null;
+      })
+    );        
+
+
+    const filter_Booked_Properties = booked_Properties.filter(property => property !== null)
+
+    res.status(201).json({
+      msg: 'Hosted properties fetched',
+      filter_Booked_Properties
     })
   } catch (error) {
     next(error)
