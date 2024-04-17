@@ -157,8 +157,7 @@ export const logged_In_User_Hosted_Properties = async (req, res, next) => {
           ? { ...property._doc,  property_Bookings }
           : null;
       })
-    );        
-
+    );      
 
     const filter_Booked_Properties = booked_Properties.filter(property => property !== null)
 

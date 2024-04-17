@@ -2,11 +2,11 @@ import { v2 as cloudinary } from "cloudinary";
 
 
 
-export const cloudinary_Handler = async (photo_Array) => {
+export const cloudinary_Handler = async (photo_Array, folder_Name) => {
   return await Promise.all(
     photo_Array.map((photo) => {
       return cloudinary.uploader.upload(photo, {
-        folder: "Airbnb_Property_Images",
+        folder: folder_Name,
       });
     })
   ).then((uploadResults) =>{
@@ -18,3 +18,5 @@ export const cloudinary_Handler = async (photo_Array) => {
     return upload_Info
   });
 };
+
+

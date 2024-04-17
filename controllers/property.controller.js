@@ -36,12 +36,11 @@ export const search_Property = async (req, res, next) => {
 export const create_New_Property = async (req, res, next) => {
     try {
         const {property_Photos} = req.body
-        // const {id} = req.user
-        const id = '65a790bfe69e8c1140bd2f57'
+        const {id} = req.user
 
         const property_Author = await User.findById(id) 
 
-        const uploaded_Photos = await cloudinary_Handler(property_Photos)
+        const uploaded_Photos = await cloudinary_Handler(property_Photos, "Airbnb_Property_Images")
 
         
         const new_Property = await Property.create({

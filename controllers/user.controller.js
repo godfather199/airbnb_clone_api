@@ -2,6 +2,8 @@ import User from '../models/user.model.js'
 import Property from '../models/property.model.js'
 import {error_Handler} from '../middlewares/errorHandler.js'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import { cloudinary_Handler } from '../middlewares/cloudinaryHandler.js'
 
 
 
@@ -160,6 +162,74 @@ export const remove_From_Whishlist = async (req, res, next) => {
             logged_In_User
         })
 
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+export const edit_User_Info = async (req, res, next) => {
+    try {
+        const {id: userId} = req.user
+        const {update_User } = req.body
+
+
+        // Update 'user_Avatar'
+        if(update_User.user_Avatar) {
+            const image_Info = await cloudinary_Handler([update_User.user_Avatar], "Airbnb_User_DP")
+
+            update_User.user_Avatar = image_Info[0]
+        }
+
+
+        // Update password
+        if(update_User.password) {
+          const salt = await bcrypt.genSalt(10);
+          update_User.password = await bcrypt.hash(update_User.password, salt);
+        }
+
+        const updated_Info = await User.findByIdAndUpdate(
+            userId,
+            update_User,
+            {
+                new: true
+            }
+        )
+
+        res.status(200).json({
+            msg: 'User info updated',
+            updated_Info
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+export const logout_User = async (req, res, next) => {
+    try {
+        res
+        .status(201)
+        .cookie('access_token_ab', "",  {
+            httpOnly: true,
+        })
+        .json({
+            msg: 'Logout successful',
+        })       
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+export const authenticate_User = async (req, res, next) => {
+    try {
+        res.status(201).json({
+            success: true
+        })
     } catch (error) {
         next(error)
     }
