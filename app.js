@@ -25,7 +25,7 @@ app.use(express.urlencoded({type: '10mb', extended: 'true'}))
 app.use(morgan('dev'))
 app.use(cookieParser())
 app.use(cors({
-    origin: 'https://airbnb-clone-client-t8vm.onrender.com/',
+    origin: 'https://airbnb-clone-client-t8vm.onrender.com',
     credentials: true
 }))
 
