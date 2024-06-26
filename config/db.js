@@ -15,7 +15,5 @@ set('strictQuery', true)
          console.log(`Unable to connect to MongoDB: ${err}`);
        });
  };
-//  rajatmehra21
-//  5zj9dFnyzNvFdxvE
 
 export default connect_MongoDB
