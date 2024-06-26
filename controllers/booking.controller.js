@@ -60,7 +60,7 @@ export const stripe_Checkout_Session = async (req, res, next) => {
       metadata: metadata_Properties,
     },
     mode: "payment",
-    success_url: `http://localhost:5173/success`,
+    success_url: `https://airbnb-clone-client-t8vm.onrender.com/success`,
   });
 
   res.status(201).json({ url: session.url });
