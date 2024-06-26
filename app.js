@@ -83,7 +83,7 @@ app.get(
   (req, res) => {
     // Redirect after successful authentication
     console.log('User object: ', req.user)
-    res.redirect("http://localhost:5173");
+    res.redirect("https://airbnb-clone-client-t8vm.onrender.com");
   }
 );
 
